@@ -31,6 +31,12 @@ export default function MechanicDashboard() {
 
   useEffect(() => {
     fetchBookings()
+
+    const interval = setInterval(() => {
+      fetchBookings()
+    }, 5000)
+
+    return () => clearInterval(interval);
   }, [])
 
   const updateStatus = async (id: string, status: string) => {
