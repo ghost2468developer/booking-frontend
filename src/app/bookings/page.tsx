@@ -31,6 +31,12 @@ export default function MyBookingsPage() {
 
   useEffect(() => {
     fetchBookings()
+
+    const interval = setInterval(() => {
+      fetchBookings()
+    }, 5000) // every 5 seconds
+
+    return () => clearInterval(interval)
   }, [])
 
   const cancelBooking = async (id: string) => {

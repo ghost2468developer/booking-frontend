@@ -11,6 +11,7 @@ export default function Sidebar() {
         <Link href="/dashboard">🏠 Dashboard</Link>
         <Link href="/bookings">📅 My Bookings</Link>
         <Link href="/mechanics">🔧 Mechanics</Link>
+        <Link href="/dashboard/mechanic">🔧 Mechanic Dashboard</Link>
       </nav>
     </aside>
   )
