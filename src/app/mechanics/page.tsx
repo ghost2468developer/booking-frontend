@@ -1,8 +1,8 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import api from "@/lib/api"
-import SlotPicker from "@/components/SlotPicker"
+import api from "../../lib/api"
+import SlotPicker from "../../components/SlotPicker"
 
 type Mechanic = {
   id: string
