@@ -7,17 +7,17 @@ export default function CreateBooking() {
   const mechanicId = searchParams.get("mechanicId")
 
   const [date, setDate] = useState("")
-  const [slots, setSlots] = useState([])
-  const [selectedSlot, setSelectedSlot] = useState("")
+  const [available, setAvailable] = useState(null)
+  const [message, setMessage] = useState("")
   const [loading, setLoading] = useState(false)
 
   const navigate = useNavigate()
 
   useEffect(() => {
-    if (date) fetchSlots()
+    if (date) checkAvailability()
   }, [date])
 
-  const fetchSlots = async () => {
+  const checkAvailability = async () => {
     try {
       setLoading(true)
 
@@ -25,10 +25,11 @@ export default function CreateBooking() {
         `/bookings/available-slots?mechanicId=${mechanicId}&date=${date}`
       )
 
-      setSlots(res.data.availableSlots)
+      setAvailable(res.data.available)
+      setMessage(res.data.message || "")
     } catch (err) {
       console.log(err.response?.data || err.message)
-      alert("Failed to load slots")
+      alert("Failed to check availability")
     } finally {
       setLoading(false)
     }
@@ -38,12 +39,11 @@ export default function CreateBooking() {
     try {
       await api.post("/bookings", {
         mechanicId,
-        date,
-        timeSlot: selectedSlot
+        date
       })
 
       alert("Booking successful!")
-      navigate("/mechanics")
+      navigate("/bookings")
     } catch (err) {
       alert(err.response?.data?.message || "Booking failed")
     }
@@ -62,30 +62,36 @@ export default function CreateBooking() {
       />
 
       {/* LOADING */}
-      {loading && <p>Loading available slots...</p>}
+      {loading && <p>Checking availability...</p>}
 
-      {/* TIME SLOTS */}
-      <div style={styles.slotGrid}>
-        {slots.map((slot) => (
-          <button
-            key={slot}
-            onClick={() => setSelectedSlot(slot)}
-            style={{
-              ...styles.slot,
-              background: selectedSlot === slot ? "#007bff" : "#eee",
-              color: selectedSlot === slot ? "#fff" : "#000"
-            }}
-          >
-            {slot}
-          </button>
-        ))}
-      </div>
+      {/* STATUS */}
+      {date && !loading && (
+        <div style={styles.statusBox}>
+          {available === true && (
+            <p style={{ color: "green" }}>
+              ✅ Mechanic is available on this day
+            </p>
+          )}
+
+          {available === false && (
+            <p style={{ color: "red" }}>
+              ❌ {message || "Mechanic is not available"}
+            </p>
+          )}
+        </div>
+      )}
 
       {/* BOOK BUTTON */}
       <button
         onClick={createBooking}
-        disabled={!selectedSlot || !date}
-        style={styles.button}
+        disabled={!date || available !== true}
+        style={{
+          ...styles.button,
+          background:
+            !date || available !== true ? "#ccc" : "#28a745",
+          cursor:
+            !date || available !== true ? "not-allowed" : "pointer"
+        }}
       >
         Confirm Booking
       </button>
@@ -95,31 +101,28 @@ export default function CreateBooking() {
 
 const styles = {
   container: {
-    padding: 30
+    padding: 30,
+    background: "#f5f6f8",
+    minHeight: "100vh"
   },
   input: {
     padding: 10,
-    marginBottom: 20
+    marginBottom: 20,
+    borderRadius: 6,
+    border: "1px solid #ccc"
   },
-  slotGrid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(4, 1fr)",
-    gap: 10,
-    marginBottom: 20
-  },
-  slot: {
+  statusBox: {
+    marginBottom: 20,
     padding: 10,
-    border: "none",
-    cursor: "pointer",
-    borderRadius: 6
+    background: "#fff",
+    borderRadius: 6,
+    boxShadow: "0 2px 8px rgba(0,0,0,0.08)"
   },
   button: {
     padding: 12,
     width: "100%",
-    background: "#28a745",
-    color: "#fff",
     border: "none",
     borderRadius: 6,
-    cursor: "pointer"
+    color: "#fff"
   }
 }
