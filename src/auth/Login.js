@@ -19,7 +19,8 @@ export default function Login() {
       })
 
       login(res.data)
-      navigate("/mechanics")
+      // navigate("/mechanics")
+      navigate("/dashboard")
     } catch (err) {
       alert(err.response?.data?.message || "Login failed")
     }

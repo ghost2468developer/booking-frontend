@@ -1,53 +1,58 @@
 import { useEffect, useState } from "react"
 import api from "../api/axios"
 
-export default function Bookings() {
+export default function MyBookings() {
   const [bookings, setBookings] = useState([])
   const [loading, setLoading] = useState(true)
 
-  useEffect(() => {
-    fetchBookings()
-  }, [])
-
   const fetchBookings = async () => {
     try {
+      setLoading(true)
+
       const res = await api.get("/bookings/mine")
       setBookings(res.data)
     } catch (err) {
-      console.log(err.response?.data || err.message)
+      console.log(err)
       alert("Failed to load bookings")
     } finally {
       setLoading(false)
     }
   }
 
+  useEffect(() => {
+    fetchBookings()
+  }, [])
+
+  // Cancel booking
   const cancelBooking = async (id) => {
     try {
       await api.patch(`/bookings/${id}/cancel`)
-      alert("Booking cancelled")
 
-      // refresh
-      fetchBookings()
+      // refresh list
+      setBookings((prev) =>
+        prev.map((b) =>
+          b.id === id ? { ...b, status: "CANCELLED" } : b
+        )
+      )
     } catch (err) {
       alert(err.response?.data?.message || "Cancel failed")
     }
   }
 
-  if (loading) return <p style={{ padding: 20 }}>Loading bookings...</p>
-
   return (
     <div style={styles.container}>
       <h2>My Bookings</h2>
 
-      {bookings.length === 0 && (
-        <p>No bookings yet.</p>
+      {loading && <p>Loading...</p>}
+
+      {!loading && bookings.length === 0 && (
+        <p>No bookings yet</p>
       )}
 
       <div style={styles.grid}>
         {bookings.map((b) => (
           <div key={b.id} style={styles.card}>
             <h3>{b.mechanic?.name}</h3>
-            <p>{b.mechanic?.email}</p>
 
             <p>📅 {new Date(b.date).toDateString()}</p>
             <p>🕒 {b.timeSlot}</p>
@@ -59,19 +64,17 @@ export default function Bookings() {
                   color:
                     b.status === "CANCELLED"
                       ? "red"
-                      : b.status === "COMPLETED"
-                      ? "green"
-                      : "black"
+                      : "green"
                 }}
               >
-                {b.status || "ACTIVE"}
+                {b.status || "BOOKED"}
               </b>
             </p>
 
             {b.status !== "CANCELLED" && (
               <button
+                style={styles.cancelBtn}
                 onClick={() => cancelBooking(b.id)}
-                style={styles.button}
               >
                 Cancel Booking
               </button>
@@ -86,7 +89,7 @@ export default function Bookings() {
 const styles = {
   container: {
     padding: 30,
-    background: "#f5f6f8",
+    background: "#f4f6f8",
     minHeight: "100vh"
   },
   grid: {
@@ -98,17 +101,17 @@ const styles = {
   card: {
     background: "#fff",
     padding: 20,
-    borderRadius: 12,
-    boxShadow: "0 2px 10px rgba(0,0,0,0.08)"
+    borderRadius: 10,
+    boxShadow: "0 2px 8px rgba(0,0,0,0.1)"
   },
-  button: {
+  cancelBtn: {
     marginTop: 10,
     width: "100%",
     padding: 10,
-    border: "none",
-    background: "#dc3545",
+    background: "red",
     color: "#fff",
-    borderRadius: 6,
+    border: "none",
+    borderRadius: 5,
     cursor: "pointer"
   }
 }
