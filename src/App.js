@@ -8,6 +8,7 @@ import Register from "./auth/Register"
 
 import UserDashboard from "./dashboard/UserDashboard"
 import MechanicsList from "./mechanics/MechanicsList"
+import MechanicDashboard from "./dashboard/MechanicDashboard"
 import CreateBooking from "./bookings/CreateBooking"
 import Bookings from "./bookings/Bookings"
 
@@ -17,6 +18,7 @@ function App() {
       <Navbar />
 
       <Routes>
+        <Route path="/mechanic-dashboard" element={<MechanicDashboard />} />
         {/* AUTH */}
         <Route path="/" element={<Login />} />
         <Route path="/register" element={<Register />} />
