@@ -4,25 +4,30 @@ import { useNavigate } from "react-router-dom"
 
 export default function MechanicsList() {
   const [mechanics, setMechanics] = useState([])
+  const [loading, setLoading] = useState(true)
   const navigate = useNavigate()
+
+  useEffect(() => {
+    fetchMechanics()
+  }, [])
 
   const fetchMechanics = async () => {
     try {
       const res = await api.get("/auth/mechanics")
       setMechanics(res.data)
     } catch (err) {
-      console.log(err)
+      console.log(err.response?.data || err.message)
       alert("Failed to load mechanics")
+    } finally {
+      setLoading(false)
     }
   }
 
-  useEffect(() => {
-    fetchMechanics()
-  }, [])
+  if (loading) return <p style={{ padding: 20 }}>Loading mechanics...</p>
 
   return (
     <div style={styles.container}>
-      <h2 style={styles.title}>Choose a Mechanic</h2>
+      <h2 style={{ marginBottom: 20 }}>Available Mechanics</h2>
 
       <div style={styles.grid}>
         {mechanics.map((m) => (
@@ -30,22 +35,24 @@ export default function MechanicsList() {
             <h3>{m.name}</h3>
             <p>{m.email}</p>
 
-            <p style={styles.badge}>
-              {m.workingDays || "No schedule set"}
+            <div style={styles.badge}>
+              {m.role || "MECHANIC"}
+            </div>
+
+            <p style={{ marginTop: 10 }}>
+              🕒 {m.startHour} - {m.endHour}
             </p>
 
             <p>
-              🕒 {m.startHour || "--"} - {m.endHour || "--"}
+              📅 {m.workingDays}
             </p>
 
             <button
               style={styles.button}
-              onClick={() =>
-                navigate(`/book/${m.id}`)
-              }
+              onClick={() => navigate(`/book?mechanicId=${m.id}`)}
             >
               Book Appointment
-            </button>
+            </button> 
           </div>
         ))}
       </div>
@@ -56,11 +63,8 @@ export default function MechanicsList() {
 const styles = {
   container: {
     padding: 30,
-    background: "#f4f6f8",
+    background: "#f5f6f8",
     minHeight: "100vh"
-  },
-  title: {
-    marginBottom: 20
   },
   grid: {
     display: "grid",
@@ -70,24 +74,25 @@ const styles = {
   card: {
     background: "#fff",
     padding: 20,
-    borderRadius: 10,
-    boxShadow: "0 2px 8px rgba(0,0,0,0.1)"
+    borderRadius: 12,
+    boxShadow: "0 2px 10px rgba(0,0,0,0.08)"
+  },
+  button: {
+    marginTop: 15,
+    width: "100%",
+    padding: 10,
+    border: "none",
+    background: "#007bff",
+    color: "#fff",
+    borderRadius: 6,
+    cursor: "pointer"
   },
   badge: {
     display: "inline-block",
-    background: "#eee",
-    padding: "5px 10px",
+    padding: "4px 8px",
+    background: "#e0f0ff",
     borderRadius: 5,
-    margin: "10px 0"
-  },
-  button: {
-    marginTop: 10,
-    width: "100%",
-    padding: 10,
-    background: "#007bff",
-    color: "#fff",
-    border: "none",
-    borderRadius: 5,
-    cursor: "pointer"
+    fontSize: 12,
+    marginTop: 5
   }
 }
